@@ -1,0 +1,203 @@
+<div class="gmw-shell">
+  <header class="gmw-header">
+    <div class="gmw-tabs" role="tablist">
+      <button type="button" class="gmw-tab {{#if isBoard}}active{{/if}}" data-tab="board"><i class="fa-solid fa-table-columns"></i> Board</button>
+      <button type="button" class="gmw-tab {{#if isNotes}}active{{/if}}" data-tab="notes"><i class="fa-solid fa-note-sticky"></i> Notes</button>
+    </div>
+    <div class="gmw-session-summary">
+      <span class="gmw-private"><i class="fa-solid fa-lock"></i> GM Private</span>
+      <strong>{{currentSessionName}}</strong>
+      <span>{{currentProgress}} complete</span>
+    </div>
+  </header>
+
+  {{#if isBoard}}
+  <section class="gmw-board-view">
+    <div class="gmw-toolbar">
+      <button type="button" data-action="create-card"><i class="fa-solid fa-plus"></i> Card</button>
+      <select class="gmw-current-session" title="Current prep session">
+        <option value="">No current session</option>
+        {{#each sessionOptions}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+      </select>
+      <button type="button" data-action="new-session" title="Create session"><i class="fa-solid fa-calendar-plus"></i></button>
+      <button type="button" data-action="toggle-session-manager" title="Manage sessions"><i class="fa-solid fa-gear"></i></button>
+      <span class="gmw-divider"></span>
+      <select class="gmw-view-mode" title="Board view">
+        <option value="all" {{#if viewAll}}selected{{/if}}>All Tasks</option>
+        <option value="current" {{#if viewCurrent}}selected{{/if}}>Current Session</option>
+      </select>
+      <input class="gmw-search" type="search" value="{{search}}" placeholder="Search cards…">
+      <select class="gmw-priority-filter" title="Priority filter">
+        <option value="">All priorities</option>
+        {{#each priorityFilters}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{value}}</option>{{/each}}
+      </select>
+      <select class="gmw-tag-filter" title="Tag filter">
+        <option value="">All tags</option>
+        {{#each tagFilters}}<option value="{{tag}}" {{#if selected}}selected{{/if}}>{{tag}}</option>{{/each}}
+      </select>
+      <button type="button" data-action="toggle-archive" title="Archived cards"><i class="fa-solid fa-box-archive"></i></button>
+    </div>
+
+    {{#if showSessionManager}}
+    <div class="gmw-inline-manager">
+      <div class="gmw-manager-title"><strong>Prep Sessions</strong><button type="button" data-action="toggle-session-manager"><i class="fa-solid fa-xmark"></i></button></div>
+      {{#if hasSessions}}
+        {{#each sessions}}
+        <div class="gmw-manager-row">
+          <span>{{name}}</span>
+          <div>
+            <button type="button" data-action="rename-session" data-session-id="{{id}}" title="Rename"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" data-action="delete-session" data-session-id="{{id}}" title="Delete"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+        {{/each}}
+      {{else}}
+        <p class="gmw-muted">No prep sessions yet.</p>
+      {{/if}}
+    </div>
+    {{/if}}
+
+    <div class="gmw-board">
+      {{#each columns}}
+      <section class="gmw-column" data-column="{{id}}">
+        <header><span>{{title}}</span><span class="gmw-count">{{cards.length}}</span></header>
+        <div class="gmw-column-cards" data-column-id="{{id}}">
+          {{#each cards}}
+          <article class="gmw-card" data-card-id="{{id}}" draggable="true" tabindex="0">{{title}}</article>
+          {{/each}}
+        </div>
+      </section>
+      {{/each}}
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if isNotes}}
+  <section class="gmw-notes-view">
+    <aside class="gmw-notes-list">
+      <button type="button" class="gmw-new-note" data-action="new-note"><i class="fa-solid fa-plus"></i> New Note</button>
+      {{#each notes}}
+      <button type="button" class="gmw-note-list-item {{#if active}}active{{/if}}" data-note-id="{{id}}">
+        <strong>{{title}}</strong><small>{{formattedTime}}</small>
+      </button>
+      {{/each}}
+    </aside>
+    <main class="gmw-note-workspace">
+      {{#if activeNote}}
+      <div class="gmw-note-heading">
+        <input class="gmw-note-title" type="text" value="{{activeNote.title}}">
+        <button type="button" data-action="delete-note" title="Delete note"><i class="fa-solid fa-trash"></i></button>
+      </div>
+      <div class="gmw-rich-toolbar">
+        <button type="button" data-command="bold" title="Bold"><i class="fa-solid fa-bold"></i></button>
+        <button type="button" data-command="italic" title="Italic"><i class="fa-solid fa-italic"></i></button>
+        <button type="button" data-command="underline" title="Underline"><i class="fa-solid fa-underline"></i></button>
+        <span></span>
+        <button type="button" data-block="h2" title="Heading"><i class="fa-solid fa-heading"></i></button>
+        <button type="button" data-block="p" title="Paragraph"><i class="fa-solid fa-paragraph"></i></button>
+        <button type="button" data-command="insertUnorderedList" title="Bulleted list"><i class="fa-solid fa-list-ul"></i></button>
+        <button type="button" data-command="insertOrderedList" title="Numbered list"><i class="fa-solid fa-list-ol"></i></button>
+        <button type="button" data-action="rich-link" title="Link"><i class="fa-solid fa-link"></i></button>
+      </div>
+      <div class="gmw-rich-editor" contenteditable="true" spellcheck="true">{{{activeNote.content}}}</div>
+      {{else}}
+      <div class="gmw-empty-state"><i class="fa-regular fa-note-sticky"></i><p>Create a private note for campaign prep, reminders, or ideas.</p></div>
+      {{/if}}
+    </main>
+  </section>
+  {{/if}}
+
+  {{#if activeCard}}
+  <div class="gmw-drawer-backdrop"></div>
+  <aside class="gmw-card-editor">
+    <div class="gmw-drawer-header">
+      <h2>Card Details</h2>
+      <button type="button" data-action="close-card"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <label>Title<input type="text" data-card-field="title" value="{{activeCard.title}}"></label>
+    <div class="gmw-grid-3">
+      <label>Priority<select data-card-field="priority">{{#each activeCard.priorityOptions}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{value}}</option>{{/each}}</select></label>
+      <label>Session<select data-card-field="sessionId"><option value="">Unassigned</option>{{#each activeCard.sessionOptions}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+      <label>Prep Date<input type="date" data-card-field="prepDate" value="{{activeCard.prepDate}}"></label>
+    </div>
+
+    <label>Description / Prep Notes<textarea data-card-field="description" rows="5">{{activeCard.description}}</textarea></label>
+
+    <section class="gmw-editor-section">
+      <div class="gmw-section-heading"><h3>Tags</h3><button type="button" data-action="add-tag"><i class="fa-solid fa-plus"></i> Tag</button></div>
+      <div class="gmw-tags">
+        {{#each activeCard.tagOptions}}
+        <label class="gmw-tag"><input type="checkbox" data-tag-value="{{tag}}" {{#if checked}}checked{{/if}}> {{tag}}</label>
+        {{/each}}
+      </div>
+    </section>
+
+    <section class="gmw-editor-section">
+      <div class="gmw-section-heading"><h3>Linked Foundry Documents</h3></div>
+      <div class="gmw-link-drop"><i class="fa-solid fa-link"></i> Drop an Actor, Scene, Journal, Item, Roll Table, Playlist, or compendium document here.</div>
+      {{#each activeCard.linkedDocuments}}
+      <div class="gmw-linked-doc">
+        <button type="button" class="gmw-link-main" data-action="open-link" data-uuid="{{uuid}}"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>{{name}}</strong><small>{{type}}</small></span></button>
+        <button type="button" data-action="remove-link" data-uuid="{{uuid}}" title="Remove link"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      {{/each}}
+    </section>
+
+    <section class="gmw-editor-section">
+      <div class="gmw-section-heading"><h3>Checklists</h3><button type="button" data-action="add-checklist"><i class="fa-solid fa-plus"></i> Checklist</button></div>
+      {{#each activeCard.checklists}}
+      <div class="gmw-checklist">
+        <div class="gmw-checklist-heading">
+          <input type="text" data-checklist-title="{{id}}" value="{{title}}">
+          <span>{{completed}} / {{total}}</span>
+          <button type="button" data-action="delete-checklist" data-checklist-id="{{id}}"><i class="fa-solid fa-trash"></i></button>
+        </div>
+        {{#each items}}
+        <div class="gmw-check-item">
+          <input type="checkbox" data-check-item-complete="{{id}}" data-checklist-id="{{../id}}" {{#if complete}}checked{{/if}}>
+          <input type="text" data-check-item-text="{{id}}" data-checklist-id="{{../id}}" value="{{text}}">
+          <button type="button" data-action="move-check-item" data-checklist-id="{{../id}}" data-item-id="{{id}}" data-direction="-1" title="Move up"><i class="fa-solid fa-chevron-up"></i></button>
+          <button type="button" data-action="move-check-item" data-checklist-id="{{../id}}" data-item-id="{{id}}" data-direction="1" title="Move down"><i class="fa-solid fa-chevron-down"></i></button>
+          <button type="button" data-action="delete-check-item" data-checklist-id="{{../id}}" data-item-id="{{id}}" title="Delete"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        {{/each}}
+        <button type="button" class="gmw-add-item" data-action="add-check-item" data-checklist-id="{{id}}"><i class="fa-solid fa-plus"></i> Add item</button>
+      </div>
+      {{/each}}
+    </section>
+
+    <section class="gmw-editor-section">
+      <div class="gmw-section-heading"><h3>Comments</h3></div>
+      <div class="gmw-comments">
+        {{#each activeCard.comments}}
+        <article class="gmw-comment"><p>{{text}}</p><footer><time>{{formattedTime}}</time><button type="button" data-action="delete-comment" data-comment-id="{{id}}"><i class="fa-solid fa-trash"></i></button></footer></article>
+        {{/each}}
+      </div>
+      <textarea class="gmw-new-comment" rows="2" placeholder="Add a prep comment…"></textarea>
+      <button type="button" data-action="add-comment"><i class="fa-solid fa-comment-medical"></i> Add Comment</button>
+    </section>
+
+    <footer class="gmw-card-actions">
+      <button type="button" data-action="duplicate-card"><i class="fa-solid fa-copy"></i> Duplicate</button>
+      <button type="button" data-action="archive-card"><i class="fa-solid fa-box-archive"></i> Archive</button>
+      <button type="button" class="danger" data-action="delete-card"><i class="fa-solid fa-trash"></i> Delete</button>
+    </footer>
+  </aside>
+  {{/if}}
+
+  {{#if showArchive}}
+  <div class="gmw-modal-backdrop">
+    <section class="gmw-modal">
+      <header><h2>Archived Cards</h2><button type="button" data-action="toggle-archive"><i class="fa-solid fa-xmark"></i></button></header>
+      <div class="gmw-archive-list">
+        {{#each archivedCards}}
+        <div class="gmw-archive-row"><span>{{title}}</span><div><button type="button" data-action="restore-card" data-card-id="{{id}}"><i class="fa-solid fa-rotate-left"></i> Restore</button><button type="button" data-action="delete-archived-card" data-card-id="{{id}}"><i class="fa-solid fa-trash"></i></button></div></div>
+        {{else}}
+        <p class="gmw-muted">No archived cards.</p>
+        {{/each}}
+      </div>
+    </section>
+  </div>
+  {{/if}}
+</div>
